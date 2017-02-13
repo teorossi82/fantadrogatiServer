@@ -30,11 +30,21 @@ router.post('/rosa/:id', function(req, res) {
 	var rosa = req.body;
 	mDb.postRosa(id_utente,rosa,res);
 });
-/* GET per prendere i dati generali di un utente */
+/* GET per prendere i dati delle rose */
 router.get('/rose', function(req, res) {
-	var qry = req.body.query;
-	var prm = req.body.params;
-	mDb.getRose(qry,prm,response.sendResponse);
+	var qry = req.query.query;
+	var prm = req.query.params;
+	mDb.getRose(qry,prm,res,response.sendResponse);
+});
+
+/* GET per prendere i dati di tutti i teams */
+router.get('/teams', function(req, res) {
+	mDb.getTeams(res,response.sendResponse);
+});
+/* GET per prendere i dati di un team */
+router.get('/team/:id', function(req, res) {
+	var id = parseInt(req.params.id);
+	mDb.getTeam(id,res,response.sendResponse);
 });
 
 module.exports = router;

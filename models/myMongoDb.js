@@ -2,6 +2,7 @@ var error = require('./error');
 var mDb = require("./myMongoDb");
 var mongoose = require('mongoose');
 var response = require('./response');
+var co = require('co');
 
 var db_name = "fantadrogati"
 //provide a sensible default for local development
@@ -111,7 +112,7 @@ roseSchema.index({ id_utente: 1 }); // schema level
 
 var Rose = mongoose.model('Rose', roseSchema);
 
-exports.getRosa = function(qry,prm,next){
+exports.getRosa = function(qry,prm,res,next){
 	Rose.find(
 		qry,
 		prm
@@ -150,4 +151,48 @@ exports.postRosa = function(id_utente,rosa,res){
 			res.jsonp(rosa);
 		}
 	)
+}
+
+exports.getTeam = function(id_utente,res,next){
+	co(function*() {
+		var utente;
+		var rosa;
+		try {
+			utente = yield Utente.find(
+				{id:id_utente}
+			)
+			.exec();
+			var rosa = yield Rose.find(
+				{id_utente:id_utente}
+			)
+			.exec();
+			utente[0]._doc.rosa = rosa[0].rosa;
+			next(utente,res);
+		}
+		catch(e) {
+	    	next(e,res);
+	  	}
+	})
+}
+
+exports.getTeams = function(res,next){
+	co(function*() {
+		try{
+			var teams = [];
+			var utenti = yield Utente.find({}).exec();
+			for(var i=0;i<utenti.length;i++){
+				var team = utenti[i]._doc;
+				var rosa = yield Rose.find(
+					{id_utente:team.id}
+				)
+				.exec();
+				team.rosa = rosa[0].rosa;
+				teams.push(team);
+			}
+			next(teams,res);
+		}
+		catch(e) {
+	    	next(e,res);
+	  	}
+	});
 }

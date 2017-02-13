@@ -152,7 +152,6 @@ exports.postRosa = function(id_utente,rosa,res){
 		}
 	)
 }
-
 exports.getTeam = function(id_utente,res,next){
 	co(function*() {
 		var utente;
@@ -196,3 +195,46 @@ exports.getTeams = function(res,next){
 	  	}
 	});
 }
+
+var asteSchema = new Schema(
+	{
+			year:{
+				type:String,
+				required: true
+			},
+			step:{
+				type:Number,
+				required: true
+			},
+			date:{
+				type:Date,
+				required: true
+			},
+			offerts: {
+				type:Array,
+				required: true
+			}
+	}
+);
+
+asteSchema.index({ year: 1 }); // schema level
+
+var Aste = mongoose.model('Aste', asteSchema);
+
+exports.getAsta = function(qry,prm){
+	Aste.find(
+		qry,
+		prm
+	)
+	.exec(
+		function(err,aste){
+			if (err){ 
+				return error.errorMessage(res,err)
+			}
+			next(aste);
+		}
+	)
+}
+
+
+>>>>>>> Stashed changes

@@ -39,7 +39,7 @@ var utenteSchema = new Schema(
 				type:String,
 				required: true
 			},
-			nome: {
+			name: {
 				type:String,
 				required: true
 			},
@@ -174,7 +174,7 @@ exports.getTeam = function(id_utente,res,next){
 	})
 }
 
-exports.getTeams = function(res,next){
+exports.getTeams = function(anno,fase,res,next){
 	co(function*() {
 		try{
 			var teams = [];
@@ -182,10 +182,10 @@ exports.getTeams = function(res,next){
 			for(var i=0;i<utenti.length;i++){
 				var team = utenti[i]._doc;
 				var rosa = yield Rose.find(
-					{id_utente:team.id}
+					{id_utente:team.id,anno:anno,numero:fase}
 				)
 				.exec();
-				team.rosa = rosa[0].rosa;
+				team.rosa = rosa[0] ? rosa[0].rosa : [];
 				teams.push(team);
 			}
 			next(teams,res);
@@ -195,7 +195,6 @@ exports.getTeams = function(res,next){
 	  	}
 	});
 }
-
 var asteSchema = new Schema(
 	{
 			year:{
@@ -221,20 +220,32 @@ asteSchema.index({ year: 1 }); // schema level
 
 var Aste = mongoose.model('Aste', asteSchema);
 
-exports.getAsta = function(qry,prm){
-	Aste.find(
-		qry,
-		prm
-	)
-	.exec(
-		function(err,aste){
-			if (err){ 
-				return error.errorMessage(res,err)
-			}
-			next(aste);
+exports.getAsta = function (id){
+	return co(function*() {
+		try {
+			var asta = yield Aste.find(
+				{id:id}
+			)
+			.exec();
+			return asta;
 		}
-	)
+		catch(e) {
+	    	var err = {"err":e};
+	    	return err;
+	  	}
+	});
 }
 
-
->>>>>>> Stashed changes
+exports.getAste = function(){
+	return co(function*() {
+		try {
+			var aste = yield Aste.find()
+			.exec();
+			return aste;
+		}
+		catch(e) {
+	    	var err = {"err":e};
+	    	return err;
+	  	}
+	})
+}

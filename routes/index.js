@@ -2,6 +2,7 @@ var express = require('express');
 var mDb = require('./../models/myMongoDb');
 var response = require('./../models/response');
 var router = express.Router();
+var co = require('co');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -38,13 +39,30 @@ router.get('/rose', function(req, res) {
 });
 
 /* GET per prendere i dati di tutti i teams */
-router.get('/teams', function(req, res) {
-	mDb.getTeams(res,response.sendResponse);
+router.get('/teams/:anno/:fase', function(req, res) {
+	var anno = parseInt(req.params.anno);
+	var fase = parseInt(req.params.fase);
+	mDb.getTeams(anno,fase,res,response.sendResponse);
 });
 /* GET per prendere i dati di un team */
 router.get('/team/:id', function(req, res) {
 	var id = parseInt(req.params.id);
 	mDb.getTeam(id,res,response.sendResponse);
+})
+/* GET per prendere i dati di una o più aste*/
+router.get('/aste', function(req, res) {
+	co(function*() {
+		var result = yield mDb.getAste();
+		response.sendResponse(result,res);
+	});
+});
+/* GET per prendere i dati di una o più aste*/
+router.get('/aste/:id', function(req, res) {
+	co(function*() {
+		var id = req.params.id;
+		var result = yield mDb.getAsta(id);
+		response.sendResponse(result,res);
+	});
 });
 
 module.exports = router;
